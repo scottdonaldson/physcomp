@@ -16,11 +16,47 @@ Pololu3pi robot;
 // set up sensor
 int PIN_DETECT = 0;
 int count = 0;
+int speed = 0;
 
-bool debug = false;
+bool debug = true;
 
 void setup() {
   robot.init(2000);
+}
+
+int setSpeed(int target) {
+
+  OrangutanLCD::print("speed ");
+  OrangutanLCD::print(speed);
+
+  if ( speed == target ) return 0;
+  
+  if ( speed > target ) {
+    speed -= 1;
+  } else if ( speed < target ) {
+    speed += 1;
+  }
+
+  OrangutanMotors::setSpeeds(speed, -1 * speed);
+  delay(100);
+
+  OrangutanLCD::clear();
+
+  return setSpeed( target );
+}
+
+void normalBehavior() {
+  speed = count % 20 < 10 ? 0 : 25;
+  OrangutanMotors::setSpeeds(speed, -1 * speed);
+}
+
+void reactionBehavior() {
+  setSpeed(0);
+  delay(1000);
+  setSpeed(60);
+  delay(2500);
+  setSpeed(0);
+  delay(2000);
 }
 
 void loop() {
@@ -29,7 +65,20 @@ void loop() {
 
   if ( debug ) {
 
-    // in debug mode, just print to LCD
+    // at 100, go into reaction behavior, otherwise normal
+//    if ( count != 100 ) {
+//      normalBehavior();
+//    } else {
+//      reactionBehavior();
+//    }
+
+    if (isOn) {
+      OrangutanMotors::setSpeeds(20, -20);
+    } else {
+      OrangutanMotors::setSpeeds(0, 0);
+      delay(2500);
+    }
+
     OrangutanLCD::print(isOn);
     delay(50);
     OrangutanLCD::clear();
@@ -39,11 +88,10 @@ void loop() {
     // if beam gets broken (if something passes
     // in front of it) move forward and back
     if ( !isOn ) {
-      OrangutanMotors::setSpeeds(60, -60);
-      delay(2000);
+      reactionBehavior();
+    } else {
+      normalBehavior();
     }
-  
-    OrangutanMotors::setSpeeds(0, 0);
   }
   
   count++;
