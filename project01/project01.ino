@@ -18,7 +18,7 @@ int PIN_DETECT = 0;
 int count = 0;
 int speed = 0;
 
-bool debug = true;
+bool debug = false;
 
 void setup() {
   robot.init(2000);
@@ -46,13 +46,13 @@ int setSpeed(int target) {
 }
 
 void normalBehavior() {
-  speed = count % 20 < 10 ? 0 : 25;
+  speed = count % 30 < 12 ? 0 : 45;
   OrangutanMotors::setSpeeds(speed, -1 * speed);
 }
 
 void reactionBehavior() {
-  setSpeed(0);
-  delay(1000);
+  OrangutanMotors::setSpeeds(0, 0);
+  delay(1500);
   setSpeed(60);
   delay(2500);
   setSpeed(0);
@@ -64,13 +64,6 @@ void loop() {
   bool isOn = digitalRead(PIN_DETECT);
 
   if ( debug ) {
-
-    // at 100, go into reaction behavior, otherwise normal
-//    if ( count != 100 ) {
-//      normalBehavior();
-//    } else {
-//      reactionBehavior();
-//    }
 
     if (isOn) {
       OrangutanMotors::setSpeeds(20, -20);
