@@ -46,17 +46,17 @@ int setSpeed(int target) {
 }
 
 void normalBehavior() {
-  speed = count % 30 < 12 ? 0 : 45;
+  speed = count % 35 < 3 ? 0 : 45;
   OrangutanMotors::setSpeeds(speed, -1 * speed);
 }
 
 void reactionBehavior() {
   OrangutanMotors::setSpeeds(0, 0);
   delay(1500);
-  setSpeed(60);
-  delay(2500);
+  setSpeed(65);
+  delay(3000);
   setSpeed(0);
-  delay(2000);
+  delay(1500);
 }
 
 void loop() {
