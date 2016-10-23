@@ -6,11 +6,12 @@ NodeMCU gets data from Python server, sends to 3pi
 #include <OSCMessage.h>
 #include <OSCBundle.h>
 #include <OSCData.h>
+#include <SoftwareSerial.h>
 
 char ssid[] = "PhysCompLab";          // your network SSID (name)
 char pass[] = "ideate60223";          // your network password
 
-SoftwareSerial mySerial(1, 0);      // RX, TX
+SoftwareSerial mySerial(16, 5);      // RX, TX
 
 // A UDP instance to let us send and receive packets over UDP
 WiFiUDP Udp;
@@ -23,7 +24,7 @@ OSCErrorCode error;
 void setup() {
 
   Serial.begin(115200);
-
+  mySerial.begin(9600);
   // Connect to WiFi network
   Serial.println();
   Serial.println();
@@ -54,7 +55,19 @@ void led(OSCMessage &msg) {
   // check if the first piece of data is an int and if so, use it
   int strLen = 0;
   if (msg.isInt(0)) {
-    Serial.println("MESSAGE GOES HERE");
+    Serial.print("sending ");
+    Serial.println(msg.getInt(0));  //sends message to computer for debugging
+
+    //this set of commands checks the received message and sends the appropriate response to the 3pi.
+    
+    if(msg.getInt(0)==1)
+    {
+      mySerial.write('a');
+    }
+    if(msg.getInt(0)==0)
+    {
+      mySerial.write('b');
+    }
   }
 }
 
@@ -71,7 +84,7 @@ void loop() {
        * instead of a message, this line would be:
        * bundle.fill(Udp.read());
        */
-      msg.fill(Udp.read());
+     msg.fill(Udp.read());
     }
     
     if (!msg.hasError()) {
@@ -81,17 +94,19 @@ void loop() {
        * does not have this address, the NodeMCU 
        * wont do anything.
        */
-      msg.dispatch("/led", led);
+     msg.dispatch("/led", led);
 
       /* If you are also sending a separate message that has
        *  the address "/motor", you could do something
        *  with it here. 
        */
        //msg.dispatch("/motor", motor_function);
-    } else {
+   } else {
       error = msg.getError();
       Serial.print("error: ");
       Serial.println(error);
     }
-  }
+  } 
+
+  
 }
