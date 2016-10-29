@@ -18,18 +18,15 @@ void setup() {
 void loop() {
   if(Serial.available())
   {
-    char value = Serial.read();  //receives message from nodeMCU
+    int value = Serial.read();  //receives message from nodeMCU
+    // value should be from 0 to 10
+    value -= 5;
+
+    OrangutanMotors::setSpeeds(15 * value, -15 * value);
     
-    if(value=='a')  //goes forward if 'a' is received
-    {
-      OrangutanMotors::setSpeeds(40, 40);
-    }
-    if(value=='b')  //goes backward if 'b' is received
-    {
-    OrangutanMotors::setSpeeds(-40, -40);
-    }
+    lcd.clear();
+    delay(100);
     lcd.print(value);
-    
   }
   
 }

@@ -59,15 +59,17 @@ void led(OSCMessage &msg) {
     Serial.println(msg.getInt(0));  //sends message to computer for debugging
 
     //this set of commands checks the received message and sends the appropriate response to the 3pi.
+
+    mySerial.write(msg.getInt(0));
     
-    if(msg.getInt(0)==1)
+    /* if(msg.getInt(0)==1)
     {
       mySerial.write('a');
     }
     if(msg.getInt(0)==0)
     {
       mySerial.write('b');
-    }
+    } */
   }
 }
 
