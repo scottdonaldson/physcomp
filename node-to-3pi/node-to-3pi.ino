@@ -56,6 +56,7 @@ void led(OSCMessage &msg) {
   int strLen = 0;
   if (msg.isInt(0) && msg.isInt(1)) {
 
+<<<<<<< HEAD
     //copy message to array for sending
     byte message[2];
     
@@ -76,6 +77,20 @@ void led(OSCMessage &msg) {
    mySerial.write(message[0]);
    mySerial.write(message[1]);
    
+=======
+    //this set of commands checks the received message and sends the appropriate response to the 3pi.
+
+    mySerial.write(msg.getInt(0));
+    
+    /* if(msg.getInt(0)==1)
+    {
+      mySerial.write('a');
+    }
+    if(msg.getInt(0)==0)
+    {
+      mySerial.write('b');
+    } */
+>>>>>>> origin/master
   }
 }
 

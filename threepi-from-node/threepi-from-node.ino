@@ -20,6 +20,7 @@ void loop() {
   int rotation;
   if(Serial.available())
   {
+<<<<<<< HEAD
      byte value = Serial.read();  //receives message from nodeMCU
     
     if(value==250)
@@ -34,6 +35,17 @@ void loop() {
     }
     lcd.print(rotation);
     
+=======
+    int value = Serial.read();  //receives message from nodeMCU
+    // value should be from 0 to 10
+    value -= 5;
+
+    OrangutanMotors::setSpeeds(15 * value, -15 * value);
+    
+    lcd.clear();
+    delay(100);
+    lcd.print(value);
+>>>>>>> origin/master
   }
 }
   
