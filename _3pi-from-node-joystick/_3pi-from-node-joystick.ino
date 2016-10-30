@@ -16,25 +16,17 @@ void setup() {
 }
 
 void loop() {
-  int power;
-  int rotation;
   if(Serial.available())
   {
-     byte value = Serial.read();  //receives message from nodeMCU
-    
-    if(value==250)
-    {
-      while(!Serial.available())
-   {}
-    power = (int)Serial.read();
-    while(!Serial.available())
-   {}
-    rotation = (int)Serial.read();
+
+    int power = Serial.read();  //receives message from nodeMCU
+    int rotation = Serial.read();
+  
     OrangutanMotors::setSpeeds(power+rotation, power-rotation);
-    }
+   
+    lcd.print(power);
     lcd.print(rotation);
     
   }
-}
   
 

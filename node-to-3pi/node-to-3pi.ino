@@ -54,20 +54,28 @@ void setup() {
 void led(OSCMessage &msg) {
   // check if the first piece of data is an int and if so, use it
   int strLen = 0;
-  if (msg.isInt(0)) {
-    Serial.print("sending ");
-    Serial.println(msg.getInt(0));  //sends message to computer for debugging
+  if (msg.isInt(0) && msg.isInt(1)) {
 
-    //this set of commands checks the received message and sends the appropriate response to the 3pi.
+    //copy message to array for sending
+    byte message[2];
     
-    if(msg.getInt(0)==1)
-    {
-      mySerial.write('a');
-    }
-    if(msg.getInt(0)==0)
-    {
-      mySerial.write('b');
-    }
+    message[0] = (byte)msg.getInt(0);
+    message[1] = (byte)msg.getInt(1);
+
+    //send commands to computer for debugging
+    Serial.print("sending ");
+    Serial.print(msg.getInt(0));
+    Serial.print("; ");
+    Serial.print(message[0]);
+    Serial.print("; ");
+    Serial.print(message[1]);
+    Serial.println();
+    //this set of commands checks the received message and sends the appropriate response to the 3pi.
+
+   mySerial.write(250);
+   mySerial.write(message[0]);
+   mySerial.write(message[1]);
+   
   }
 }
 
