@@ -4,6 +4,10 @@ waiting for 1 seconds between each value.
 
 Example edited on 9-20-16 by Joseph Paetz for use in Intro to Physical
     Computing (60-223) at Carnegie Mellon University
+
+MODIFIED by eholthau and sdonalds for 60-223 F16.  This version sends power and turning values stored in an array of arrays to the address at the time interval specified as the third element.
+
+data format: instructions = [ (power1, rotation1, time1), (power2, rotation2, time2), ...(power_n, rotation_n, time_n) ]
 """
 import argparse
 import random
@@ -19,6 +23,55 @@ power = 0
 rotation = 100
 
 instructions = [
+	(50, 0, 0.1),		# jitter
+	(-50, 0, 0.1),
+	(0,0,1.8),
+	(50, 0, 0.1),		# jitter
+	(-50, 0, 0.1),
+	(0,0,1.8),
+	(50, 0, 0.1),		# jitter
+	(-50, 0, 0.1),
+	(0,0,1.8),
+	(50, 0, 0.1),		# jitter
+	(-50, 0, 0.4),
+	(0,0,1.5),
+	(50,25,1),
+	(70,25,1),
+	(100,2,1),
+	(100,10,1),
+	(70,35,0.3),
+	(110,5,1.2),
+	(110,0,0.3),
+	(100,25,0.5),
+	(110,10,1),
+	(110,25,0.7),
+	(110,7,0.75),
+	(50,50,0.6),
+	(0,0,1),
+	(50, 0, 0.1),		# jitter
+	(-50, 0, 0.1),
+	(0,0,1),
+	(70,0,0.5),
+	(100,-50,0.5),
+	(70,0,0.5),
+	(50,50,0.4),
+	(100,5,1),
+	(100,10,1),
+	(70,35,0.25),
+	(110,5,1.3),
+	(70,40,0.5),
+	(50, 0, 0.1),		# jitter
+	(-50, 0, 0.1),
+	(0,0,1.8),
+	(50, 0, 0.1),		# jitter
+	(-50, 0, 0.1),
+	(0,0,1.8),
+	(50, 0, 0.1),		# jitter
+	(-50, 0, 0.1),
+	(0,0,1)
+]
+
+instructionss = [
 			#t0
 	(15,1,3),
 	(31,15,2),  
@@ -41,7 +94,7 @@ instructions = [
 	(0,0,0)		#end
 ]
 
-instructionss = [
+instructionsss = [
 					# t00
 	(50, 0, 1), 	# t01
 	(0, 50, 0.2),
@@ -84,7 +137,7 @@ instructionss = [
 	(70, -15, 2),	# t30
 	(0, 60, 0.6),
 
-	(0, 0, 1),
+	(0, 0, 1)
 ]
 
 if __name__ == "__main__":
