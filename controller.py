@@ -23,52 +23,52 @@ power = 0
 rotation = 100
 
 instructions = [
-	(50, 0, 0.1),		# jitter
-	(-50, 0, 0.1),
-	(0,0,1.8),
-	(50, 0, 0.1),		# jitter
-	(-50, 0, 0.1),
-	(0,0,1.8),
-	(50, 0, 0.1),		# jitter
-	(-50, 0, 0.1),
-	(0,0,1.8),
-	(50, 0, 0.1),		# jitter
-	(-50, 0, 0.4),
-	(0,0,1.5),
-	(50,25,1),
-	(70,25,1),
-	(100,2,1),
-	(100,10,1),
-	(70,35,0.3),
-	(110,5,1.2),
-	(110,0,0.3),
-	(100,25,0.5),
-	(110,10,1),
-	(110,25,0.7),
-	(110,7,0.75),
-	(50,50,0.6),
-	(0,0,1),
-	(50, 0, 0.1),		# jitter
-	(-50, 0, 0.1),
-	(0,0,1),
-	(70,0,0.5),
-	(100,-50,0.5),
-	(70,0,0.5),
-	(50,50,0.4),
-	(100,5,1),
-	(100,10,1),
-	(70,35,0.25),
-	(110,5,1.3),
-	(70,40,0.5),
-	(50, 0, 0.1),		# jitter
-	(-50, 0, 0.1),
-	(0,0,1.8),
-	(50, 0, 0.1),		# jitter
-	(-50, 0, 0.1),
-	(0,0,1.8),
-	(50, 0, 0.1),		# jitter
-	(-50, 0, 0.1),
-	(0,0,1)
+	( 50,  0, 0.1),		# jitter
+	(-50,  0, 0.1),
+	(  0,  0, 1.8),
+	( 50,  0, 0.1),		# jitter
+	(-50,  0, 0.1),
+	(  0,  0, 1.8),
+	( 50,  0, 0.1),		# jitter
+	(-50,  0, 0.1),
+	(  0,  0, 1.8),
+	( 50,  0, 0.1),		# jitter
+	(-50,  0, 0.4),
+	(  0,  0, 1.5),
+	( 50, 25,   1),
+	( 70, 25,   1),
+	(100,  2,   1),
+	(100, 10,   1),
+	(70,  35, 0.3),
+	(110,  5, 1.2),
+	(110,  0, 0.3),
+	(100, 25, 0.5),
+	(110, 10,   1),
+	(110, 25, 0.7),
+	(110,  7,0.75),
+	( 50, 50, 0.6),
+	(  0,  0,   1),
+	( 50,  0, 0.1),		# jitter
+	(-50,  0, 0.1),
+	(  0,  0,   1),
+	( 70,  0, 0.5),
+	(100,-50, 0.5),
+	( 70,  0, 0.5),
+	( 50, 50, 0.4),
+	(100,  5,   1),
+	(100, 10,   1),
+	( 70, 35,0.25),
+	(110,  5, 1.3),
+	( 70, 40, 0.5),
+	( 50,  0, 0.1),		# jitter
+	(-50,  0, 0.1),
+	(  0,  0, 1.8),
+	( 50,  0, 0.1),		# jitter
+	(-50,  0, 0.1),
+	(  0,  0, 1.8),
+	( 50,  0, 0.1),		# jitter
+	(-50,  0, 0.1),
+	(  0,  0,   1)
 ]
 
 instructionss = [
@@ -141,28 +141,11 @@ instructionsss = [
 	(0, 0, 1),		# end
 ]
 
-if __name__ == "__main__":
-    # REPLACE WITH YOUR NODEMCU's IP
-	ip = "192.168.1.9"
-
-    # This should match the localPort variable in the Arduino sketch
-	port = 1410
-
-	# these lines set things up to recieve input from the command line
-	#  that will over write the default ip and port above
-	parser = argparse.ArgumentParser()
-	parser.add_argument("--ip", default=ip, help="The ip of the OSC server")
-	parser.add_argument("--port", type=int, default=port,
-	                help="The port the OSC server is listening on")
-	args = parser.parse_args()
-
-	# set up udp client
-	client = udp_client.UDPClient(args.ip, args.port)
-
-	for i in range(len(instructions)):
-		power = instructions[i][0] + 100
-		rotation = instructions[i][1] + 100
-		t = instructions[i][2]
+def play(inst):
+	for i in range(len(inst)):
+		power = inst[i][0] + 100
+		rotation = inst[i][1] + 100
+		t = inst[i][2]
 
 		#  - if you wanted to send a bundle, you could use:
 		#       bundle = osc_bundle_builder.OscBundleBuilder(osc_bundle_builder.IMMEDIATELY)
@@ -194,6 +177,31 @@ if __name__ == "__main__":
 		client.send(msg)
 
 		time.sleep(t)
+
+if __name__ == "__main__":
+    # REPLACE WITH YOUR NODEMCU's IP
+	ip = "192.168.1.9"
+
+    # This should match the localPort variable in the Arduino sketch
+	port = 1410
+
+	# these lines set things up to recieve input from the command line
+	#  that will over write the default ip and port above
+	parser = argparse.ArgumentParser()
+	parser.add_argument("--ip", default=ip, help="The ip of the OSC server")
+	parser.add_argument("--port", type=int, default=port,
+	                help="The port the OSC server is listening on")
+	args = parser.parse_args()
+
+	# set up udp client
+	client = udp_client.UDPClient(args.ip, args.port)
+
+	play(instructionsss)
+	sleep(5)
+	play(instructionss)
+	sleep(5)
+	play(instructions)
+		
 
 	while True:
 		# build the msg to send to the NodeMCU. This is the address that
