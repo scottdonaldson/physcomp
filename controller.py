@@ -12,171 +12,20 @@ data format: instructions = [ (power1, rotation1, time1), (power2, rotation2, ti
 import argparse
 import random
 import time
-import requests
-import json
+import curses
 
 from pythonosc import osc_bundle_builder
 from pythonosc import osc_message_builder
 from pythonosc import udp_client
 
-power = 0
+power = 100
 rotation = 100
 
-instructions = [
-	( 50,  0, 0.1),		# jitter
-	(-50,  0, 0.1),
-	(  0,  0, 1.8),
-	( 50,  0, 0.1),		# jitter
-	(-50,  0, 0.1),
-	(  0,  0, 1.8),
-	( 50,  0, 0.1),		# jitter
-	(-50,  0, 0.1),
-	(  0,  0, 1.8),
-	( 50,  0, 0.1),		# jitter
-	(-50,  0, 0.4),
-	(  0,  0, 1.5),
-	( 50, 25,   1),
-	( 70, 25,   1),
-	(100,  2,   1),
-	(100, 10,   1),
-	(70,  35, 0.3),
-	(110,  5, 1.2),
-	(110,  0, 0.3),
-	(100, 25, 0.5),
-	(110, 10,   1),
-	(110, 25, 0.7),
-	(110,  7,0.75),
-	( 50, 50, 0.6),
-	(  0,  0,   1),
-	( 50,  0, 0.1),		# jitter
-	(-50,  0, 0.1),
-	(  0,  0,   1),
-	( 70,  0, 0.5),
-	(100,-50, 0.5),
-	( 70,  0, 0.5),
-	( 50, 50, 0.4),
-	(100,  5,   1),
-	(100, 10,   1),
-	( 70, 35,0.25),
-	(110,  5, 1.3),
-	( 70, 40, 0.5),
-	( 50,  0, 0.1),		# jitter
-	(-50,  0, 0.1),
-	(  0,  0, 1.8),
-	( 50,  0, 0.1),		# jitter
-	(-50,  0, 0.1),
-	(  0,  0, 1.8),
-	( 50,  0, 0.1),		# jitter
-	(-50,  0, 0.1),
-	(  0,  0,   1)
-]
+def setPower(p):
+	power = p + 100
 
-instructionss = [
-			#t0
-	#pow//rot//t
-	(15,  1,   3),
-	(31, 15,   2),  
-	(40,  1, 3.5),  #t07
-	(40,  0, 3.5),
-	(40,  6,   5),
-	(15,  0,   2),
-	( 0, 60, 0.5), #180 in place
-	(20, -1,   2),
-	( 0, 60, 0.3),
-	(30,  2,   8),
-	( 0, 60,0.33),
-	(35,  1,   2),
-	(35,  0,   2),
-	(35,  1,   2),
-	(35,  0,   2),
-	(40,  1,   2),
-	(35,  1,   2),
-	( 0,-30, 0.5),
-	( 0,  0,   0)  #end
-]
-
-instructionsss = [
-					# t00
-	( 50,  0,   1), 	# t01
-	(  0, 50, 0.2),
-	(  0,  0,   1),		
-	( 50,  0, 0.1),		# jitter
-	(-50,  0, 0.1),
-	(  0,  0,   1),
-	( 50,  0, 0.1),		# jitter
-	(-50,  0, 0.1),
-	(  0,  0,   2),	
-	( 50,  0,   2),		
-	(  0,  0,   1), 	# t06
-	( 60, 58, 0.5),
-	( 45,  0,   3),		# t09 = t00
-	(  0,-60, 0.4),
-	(  0,  0,   1),
-	( 50,  0, 0.1),		# jitter
-	(-50,  0, 0.1),
-	(  0,  0, 0.5),
-	(  0,-20, 0.5),
-	( 60,  0,   2),		# t12 = t06
-	(  0, 65, 0.5),
-	( 65,  0, 1.5),	# t14 = t09 = t00
-	(  0,  0,   1),
-	(  0, 65, 0.5),
-	( 50,  0, 0.1),		# jitter
-	(-50,  0, 0.1),
-	(  0,  0, 0.5),
-	( 35,  0,   2),		# t17
-	(  0,  0,   1),
-	(  0,-60, 0.5),
-	( 50, -5,   3),	# t22
-	(  0, 60, 0.5),
-	( 50,  0,   1),
-	( 60,  6,   3),		# t26 = t12 = t06
-	(  0, 60, 0.2),
-	( 60,  0, 1.5),	# t27
-	(  0, 60, 0.5),
-	( 60,  0,   1),		# t28
-	( 70,-15,   2),	# t30
-	(  0, 60, 0.6),
-
-	(0, 0, 1),		# end
-]
-
-def play(inst):
-	for i in range(len(inst)):
-		power = inst[i][0] + 100
-		rotation = inst[i][1] + 100
-		t = inst[i][2]
-
-		#  - if you wanted to send a bundle, you could use:
-		#       bundle = osc_bundle_builder.OscBundleBuilder(osc_bundle_builder.IMMEDIATELY)
-		#       {build your message and add data to it like you do below}
-		#       bundle.add_content(msg1)
-		#       bundle.add_content(msg2)
-		#       bundle = bundle.build()
-		#       client.sen(bundle)
-
-		# build the msg to send to the NodeMCU. This is the address that
-		# the NodeMCU will be watching for
-		msg = osc_message_builder.OscMessageBuilder(address = "/led")
-
-		# start byte
-		# msg.add_arg(250)
-
-		# power
-		msg.add_arg(power)
-
-		# rotation
-		msg.add_arg(rotation)
-
-		print("sending")
-		print(str(power) + ' ' + str(rotation))
-
-		msg = msg.build()
-
-		#send the message
-		client.send(msg)
-
-		time.sleep(t)
+def setRotation(r):
+	rotation = r + 100
 
 if __name__ == "__main__":
     # REPLACE WITH YOUR NODEMCU's IP
@@ -196,23 +45,65 @@ if __name__ == "__main__":
 	# set up udp client
 	client = udp_client.UDPClient(args.ip, args.port)
 
-	play(instructionsss)
-	sleep(5)
-	play(instructionss)
-	sleep(5)
-	play(instructions)
-		
+	stdscr = curses.initscr()
+
+	curses.noecho()
+
+	curses.cbreak()
+
+	stdscr.keypad(1)
 
 	while True:
-		# build the msg to send to the NodeMCU. This is the address that
+
+		c = stdscr.getch()
+
+		if c == ord('w'):
+			power += 4
+		elif c == ord('s'):
+			power -= 4
+
+		if c == ord('a'):
+			rotation -= 2
+		elif c == ord('d'):
+			rotation += 2
+
+		if power < 0: power = 0
+		if power > 200: power = 200
+		if rotation < 0: rotation = 0
+		if rotation > 200: rotation = 200
+
+		if c == ord('q'):
+			curses.nocbreak()
+			stdscr.keypad(0)
+			curses.echo()
+			curses.endwin()
+
+			break
+
+		stdscr.addstr(0, 0, "power: " + str(power - 100) + " / rotation: " + str(rotation - 100))
+		stdscr.refresh()
+
+        # build the msg to send to the NodeMCU. This is the address that
 		# the NodeMCU will be watching for
+		
 		msg = osc_message_builder.OscMessageBuilder(address = "/led")
 
 		# send 0, 0 to shut it off
-		msg.add_arg(100)
-		msg.add_arg(100)
+		msg.add_arg(power)
+		msg.add_arg(rotation)
 
 		msg = msg.build()
 
 		client.send(msg)
-		time.sleep(1)
+		time.sleep(0.15)
+
+	msg = osc_message_builder.OscMessageBuilder(address = "/led")
+
+	# send 0, 0 to shut it off
+	msg.add_arg(100)
+	msg.add_arg(100)
+
+	msg = msg.build()
+
+	client.send(msg)
+	time.sleep(1)
