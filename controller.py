@@ -21,11 +21,17 @@ from pythonosc import udp_client
 power = 100
 rotation = 100
 
-def setPower(p):
-	power = p + 100
+def stabilize(x):
+	if x < 100:
+		x += 1
+	elif x > 100:
+		x -= 1
+	return x
 
-def setRotation(r):
-	rotation = r + 100
+def clamp(x):
+	if x > 200: return 200
+	if x < 0: return 0
+	return x
 
 if __name__ == "__main__":
     # REPLACE WITH YOUR NODEMCU's IP
@@ -53,24 +59,28 @@ if __name__ == "__main__":
 
 	stdscr.keypad(1)
 
+	stdscr.nodelay(1)
+
 	while True:
 
 		c = stdscr.getch()
 
+		power = stabilize(power)
+
 		if c == ord('w'):
-			power += 4
+			power += 10
 		elif c == ord('s'):
-			power -= 4
+			power -= 10
+
+		rotation = stabilize(rotation)
 
 		if c == ord('a'):
-			rotation -= 2
+			rotation -= 3
 		elif c == ord('d'):
-			rotation += 2
+			rotation += 3
 
-		if power < 0: power = 0
-		if power > 200: power = 200
-		if rotation < 0: rotation = 0
-		if rotation > 200: rotation = 200
+		power = clamp(power)
+		rotation = clamp(rotation)
 
 		if c == ord('q'):
 			curses.nocbreak()
@@ -80,12 +90,17 @@ if __name__ == "__main__":
 
 			break
 
-		stdscr.addstr(0, 0, "power: " + str(power - 100) + " / rotation: " + str(rotation - 100))
+
+		stdscr.addstr(
+			0, 
+			0, 
+			"power: " + str(power - 100).zfill(3) + " / rotation: " + str(rotation - 100).zfill(3)
+		)
 		stdscr.refresh()
 
         # build the msg to send to the NodeMCU. This is the address that
 		# the NodeMCU will be watching for
-		
+
 		msg = osc_message_builder.OscMessageBuilder(address = "/led")
 
 		# send 0, 0 to shut it off
